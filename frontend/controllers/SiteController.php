@@ -116,10 +116,51 @@ class SiteController extends Controller
             $deaths,
         ];
 
+        $case_sum = $this->getData('https://covid19.th-stat.com/api/open/cases/sum');
+
+        $provinces_name = [];
+        $provinces_data = [];
+        foreach($case_sum->Province as $province => $value) {
+            $provinces_name[] = $province;
+            $provinces_data[] = (int) $value;
+        }
+
+        $nation_name = [];
+        $nation_data = [];
+        foreach($case_sum->Nation as $nation => $value) {
+            $nation_name[] = $nation;
+            $nation_data[] = $value;
+        }
+
+        $gender_name = [];
+        $gender_data = [];
+        foreach($case_sum->Gender as $gender => $value) {
+            $gender_name[] = $gender;
+            $gender_data[] = $value;
+        }
+
+
         return $this->render('index', [
             'today' => $today,
-            'timeline' => $timeline
+            'timeline' => $timeline,
+            'provinces_name' => $provinces_name,
+            'provinces_data' => $provinces_data,
+            'nation_name' => $nation_name,
+            'nation_data' => $nation_data,
+            'gender_name' => $gender_name,
+            'gender_data' => $gender_data,
         ]);
+    }
+
+    public function getData($url)
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $result = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        return ($status >= 200 && $status < 300) ? json_decode($result) : false;
     }
 
     /**
